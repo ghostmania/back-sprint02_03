@@ -1,0 +1,18 @@
+tags:
+  - name: Videos
+    description: API for managing videos
+
+paths:
+  /api/videos:
+    get:
+      summary: Get a list of all videos
+      tags: [Videos]
+      responses:
+        200:
+          description: List of all videos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Videos'
