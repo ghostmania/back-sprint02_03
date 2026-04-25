@@ -3,14 +3,14 @@ import { createErrorMessages } from '../../core/utils/error.utils';
 import { HttpStatus } from '../../core/types/http-statuses';
 import { postsRepository } from '../repositories/posts.repository';
 
-export const DocumentExistGuardMiddleware = (
+export const DocumentExistGuardMiddleware = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
   const id = req.params.id + '';
 
-  const doc = postsRepository.findById(id);
+  const doc = await postsRepository.findById(id);
 
   if (!doc) {
     res
