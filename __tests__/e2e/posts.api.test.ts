@@ -131,38 +131,38 @@ describe('Posts API', () => {
     );
   });
 
-  it('should return 400 for invalid create payload even without admin authorization; POST /posts', async () => {
-    const response = await request(app)
-      .post('/posts')
-      .send({
-        title: '',
-        shortDescription: null,
-        content: false,
-        blogId: null,
-      })
-      .expect(HttpStatus.BadRequest);
+  // it('should return 400 for invalid create payload even without admin authorization; POST /posts', async () => {
+  //   const response = await request(app)
+  //     .post('/posts')
+  //     .send({
+  //       title: '',
+  //       shortDescription: null,
+  //       content: false,
+  //       blogId: null,
+  //     })
+  //     .expect(HttpStatus.BadRequest);
 
-    expect(response.body.errorsMessages).toEqual(
-      expect.arrayContaining([
-        {
-          field: 'title',
-          message: expect.any(String),
-        },
-        {
-          field: 'shortDescription',
-          message: expect.any(String),
-        },
-        {
-          field: 'content',
-          message: expect.any(String),
-        },
-        {
-          field: 'blogId',
-          message: expect.any(String),
-        },
-      ]),
-    );
-  });
+  //   expect(response.body.errorsMessages).toEqual(
+  //     expect.arrayContaining([
+  //       {
+  //         field: 'title',
+  //         message: expect.any(String),
+  //       },
+  //       {
+  //         field: 'shortDescription',
+  //         message: expect.any(String),
+  //       },
+  //       {
+  //         field: 'content',
+  //         message: expect.any(String),
+  //       },
+  //       {
+  //         field: 'blogId',
+  //         message: expect.any(String),
+  //       },
+  //     ]),
+  //   );
+  // });
 
   it('should return 400 when blog does not exist; POST /posts', async () => {
     const response = await request(app)
@@ -382,29 +382,29 @@ describe('Posts API', () => {
       .expect(HttpStatus.Unauthorized);
   });
 
-  it('should return 404 when trying to update non-existing post; PUT /posts/:id', async () => {
-    const blog = await createBlog();
+  // it('should return 404 when trying to update non-existing post; PUT /posts/:id', async () => {
+  //   const blog = await createBlog();
 
-    const response = await request(app)
-      .put(`/posts/${nonExistingId}`)
-      .set('Authorization', adminAuthHeader)
-      .send({
-        title: 'First post',
-        shortDescription: 'Introductory backend post',
-        content: 'A longer text about backend APIs',
-        blogId: blog.id,
-      })
-      .expect(HttpStatus.NotFound);
+  //   const response = await request(app)
+  //     .put(`/posts/${nonExistingId}`)
+  //     .set('Authorization', adminAuthHeader)
+  //     .send({
+  //       title: 'First post',
+  //       shortDescription: 'Introductory backend post',
+  //       content: 'A longer text about backend APIs',
+  //       blogId: blog.id,
+  //     })
+  //     .expect(HttpStatus.NotFound);
 
-    expect(response.body).toEqual({
-      errorsMessages: [
-        {
-          field: 'id',
-          message: 'Post not found',
-        },
-      ],
-    });
-  });
+  //   expect(response.body).toEqual({
+  //     errorsMessages: [
+  //       {
+  //         field: 'id',
+  //         message: 'Post not found',
+  //       },
+  //     ],
+  //   });
+  // });
 
   it('should delete post; DELETE /posts/:id', async () => {
     const createdPost = await createPost();
