@@ -1,10 +1,11 @@
 import { Collection, Db, MongoClient } from 'mongodb';
 import { SETTINGS } from '../core/settings/settings';
+import { Post } from '../posts/types/post';
 
-const DRIVER_COLLECTION_NAME = 'drivers';
+const POSTS_COLLECTION_NAME = 'posts';
 
 export let client: MongoClient;
-// export let driverCollection: Collection<Driver>;
+export let postsCollection: Collection<Post>;
 
 // Подключения к бд
 export async function runDB(url: string): Promise<void> {
@@ -12,7 +13,7 @@ export async function runDB(url: string): Promise<void> {
   const db: Db = client.db(SETTINGS.DB_NAME);
 
   //Инициализация коллекций
-  // driverCollection = db.collection<Driver>(DRIVER_COLLECTION_NAME);
+  postsCollection = db.collection<Post>(POSTS_COLLECTION_NAME);
 
   try {
     await client.connect();

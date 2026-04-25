@@ -1,7 +1,12 @@
 import { HttpStatus } from '../../../core/types/http-statuses';
-import { db } from '../../../db/posts.db';
 import { Request, Response } from 'express';
+import { postsRepository } from '../../repositories/posts.repository';
 
-export function getPostsListHandler(req: Request, res: Response) {
-  res.status(HttpStatus.Ok).send(db.posts);
+export async function getPostsListHandler(req: Request, res: Response) {
+  try {
+    const drivers = await postsRepository.findAll();
+    res.send(drivers);
+  } catch (e: unknown) {
+    res.sendStatus(HttpStatus.InternalServerError);
+  }
 }
