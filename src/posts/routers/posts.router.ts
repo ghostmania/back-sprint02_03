@@ -23,15 +23,15 @@ postsRouter
 
   .put(
     '/:id',
-    DocumentExistGuardMiddleware,
     superAdminGuardMiddleware,
+    DocumentExistGuardMiddleware,
     PostHasValidFIeldsMiddleware,
     updatePostHandler,
   )
 
   .delete(
     '/:id',
-    DocumentExistGuardMiddleware,
     superAdminGuardMiddleware,
+    DocumentExistGuardMiddleware,
     deletePostHandler,
   );

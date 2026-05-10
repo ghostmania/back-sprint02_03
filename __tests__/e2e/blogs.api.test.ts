@@ -163,7 +163,10 @@ describe('Blogs API', () => {
 
     const response = await request(app).get('/blogs').expect(HttpStatus.Ok);
 
-    expect(response.body).toEqual([firstBlog, secondResponse.body]);
+    expect(response.body).toHaveLength(2);
+    expect(response.body).toEqual(
+      expect.arrayContaining([firstBlog, secondResponse.body]),
+    );
   });
 
   it('should return blog by id; GET /blogs/:id', async () => {

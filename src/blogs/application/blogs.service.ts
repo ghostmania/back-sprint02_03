@@ -22,8 +22,11 @@ export const blogsService = {
     return blogsRepository.findByIdOrFail(id);
   },
   async update(id: string, dto: BlogAttributes): Promise<void> {
+    const blog = await blogsRepository.findById(id);
+    if (!blog) {
+      throw new DomainError('Blog not found', HttpStatus.NotFound);
+    }
     await blogsRepository.update(id, dto);
-    return;
   },
   async delete(id: string): Promise<void> {
     const blog = await blogsRepository.findById(id);
