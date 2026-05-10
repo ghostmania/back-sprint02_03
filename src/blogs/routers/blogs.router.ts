@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { query } from 'express-validator';
 import { getBlogsListHandler } from './handlers/get-blog-list.hadler';
 import { getBlogByIdHandler } from './handlers/get-blog-by-id.handler';
 import { createBlogHandler } from './handlers/create-blog.handler';
@@ -9,6 +10,7 @@ import { BlogHasValidFIeldsMiddleware } from '../../posts/middleware/BlogHasVali
 import { idValidation } from '../../core/middleware/validation/params-id.validation-middleware';
 import { paginationAndSortingValidation } from '../../core/middleware/validation/query-pagination-sorting.validation-middleware';
 import { BlogSortField } from './input/blog-sort-field';
+import { PostSortField } from '../../posts/routers/input/post-sort-field';
 import { inputValidationResultMiddleware } from '../../core/middleware/validation/input-validtion-result.middleware';
 import { getBlogPostListHandler } from './handlers/get-blog-post-list.handler';
 import { createBlogForPostHandler } from './handlers/create-blog-post.handler';
@@ -19,6 +21,7 @@ export const blogsRouter = Router({});
 blogsRouter
   .get(
     '',
+    query('searchNameTerm').optional().isString(),
     paginationAndSortingValidation(BlogSortField),
     inputValidationResultMiddleware,
     getBlogsListHandler,
@@ -43,7 +46,7 @@ blogsRouter
   .get(
     '/:id/posts',
     idValidation,
-    paginationAndSortingValidation(BlogSortField),
+    paginationAndSortingValidation(PostSortField),
     inputValidationResultMiddleware,
     getBlogPostListHandler,
   )
