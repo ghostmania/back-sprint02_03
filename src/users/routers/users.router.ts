@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { query } from 'express-validator';
 import { paginationAndSortingValidation } from '../../core/middleware/validation/query-pagination-sorting.validation-middleware';
 import { inputValidationResultMiddleware } from '../../core/middleware/validation/input-validtion-result.middleware';
 import { getUsersListHandler } from './handlers/get-users-list.handler';
@@ -13,6 +14,8 @@ export const usersRouter = Router({});
 usersRouter
   .get(
     '',
+    query('searchLoginTerm').optional().isString(),
+    query('searchEmailTerm').optional().isString(),
     paginationAndSortingValidation(UsersSortField),
     inputValidationResultMiddleware,
     getUsersListHandler,
