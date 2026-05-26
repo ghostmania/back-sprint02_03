@@ -1,9 +1,9 @@
 import express from 'express';
 import request from 'supertest';
 import { HttpStatus } from '../../src/core/types/http-statuses';
-import { SETTINGS } from '../../src/core/settings/settings';
 import { client, runDB } from '../../src/db/mongo.db';
 import { setupApp } from '../../src/setup-app';
+import { appConfig } from '../../src/common/config/config';
 
 describe('Blog Posts API', () => {
   const app = express();
@@ -44,7 +44,7 @@ describe('Blog Posts API', () => {
   };
 
   beforeAll(async () => {
-    await runDB(SETTINGS.MONGO_URL);
+    await runDB(appConfig.MONGO_URL);
   });
 
   beforeEach(async () => {
@@ -104,7 +104,11 @@ describe('Blog Posts API', () => {
       const blogB = await request(app)
         .post('/blogs')
         .set('Authorization', adminAuthHeader)
-        .send({ name: 'Blog B', description: 'Another blog', websiteUrl: 'https://blog-b.dev' })
+        .send({
+          name: 'Blog B',
+          description: 'Another blog',
+          websiteUrl: 'https://blog-b.dev',
+        })
         .expect(HttpStatus.Created)
         .then((r) => r.body as { id: string });
 

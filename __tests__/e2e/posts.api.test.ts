@@ -1,9 +1,9 @@
 import express from 'express';
 import request from 'supertest';
 import { HttpStatus } from '../../src/core/types/http-statuses';
-import { SETTINGS } from '../../src/core/settings/settings';
 import { client, runDB } from '../../src/db/mongo.db';
 import { setupApp } from '../../src/setup-app';
+import { appConfig } from '../../src/common/config/config';
 
 describe('Posts API', () => {
   const app = express();
@@ -61,7 +61,7 @@ describe('Posts API', () => {
   };
 
   beforeAll(async () => {
-    await runDB(SETTINGS.MONGO_URL);
+    await runDB(appConfig.MONGO_URL);
   });
 
   beforeEach(async () => {

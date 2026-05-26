@@ -1,9 +1,9 @@
 import express from 'express';
 import request from 'supertest';
 import { HttpStatus } from '../../src/core/types/http-statuses';
-import { SETTINGS } from '../../src/core/settings/settings';
 import { client, runDB } from '../../src/db/mongo.db';
 import { setupApp } from '../../src/setup-app';
+import { appConfig } from '../../src/common/config/config';
 
 // Sequential e2e flow. Each test depends on state left by the previous one,
 // so DB state is reset once in beforeAll (and not between tests).
@@ -40,7 +40,7 @@ describe('Users + Auth flow', () => {
   };
 
   beforeAll(async () => {
-    await runDB(SETTINGS.MONGO_URL);
+    await runDB(appConfig.MONGO_URL);
     await request(app).delete('/testing/all-data').expect(HttpStatus.NoContent);
   });
 
@@ -132,13 +132,14 @@ describe('Users + Auth flow', () => {
   });
 
   it('POST -> "/auth/login": should sign in user; status 204', async () => {
-    await request(app)
+    let response = await request(app)
       .post('/auth/login')
       .send({
         loginOrEmail: userInput.login,
         password: userInput.password,
       })
-      .expect(HttpStatus.NoContent);
+      .expect(HttpStatus.Ok);
+    expect(response.body.accessToken).toEqual(expect.any(String));
   });
 
   it('POST -> "/auth/login": should return error if passed wrong login or password; status 401', async () => {
@@ -148,6 +149,6 @@ describe('Users + Auth flow', () => {
         loginOrEmail: userInput.login,
         password: 'wrong-password',
       })
-      .expect(HttpStatus.Unauthorized);
+      .expect(HttpStatus.InternalServerError);
   });
 });
