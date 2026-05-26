@@ -5,6 +5,7 @@ import { Blog } from '../types/blog';
 import { DomainError } from '../../core/errors/domain.error';
 import { HttpStatus } from '../../core/types/http-statuses';
 import { BlogQueryInput } from '../routers/input/blog-query.input';
+import { blogsQueryRepository } from '../repositories/blogs.query.repository';
 
 export const blogsService = {
   async createBlog(dto: BlogAttributes) {
@@ -18,14 +19,14 @@ export const blogsService = {
     return await blogsRepository.create(newBlog);
   },
   async findByIdOrFail(id: string): Promise<WithId<Blog>> {
-    return blogsRepository.findByIdOrFail(id);
+    return blogsQueryRepository.findByIdOrFail(id);
   },
   async update(id: string, dto: BlogAttributes): Promise<void> {
     const blog = await blogsRepository.findById(id);
     if (!blog) {
       throw new DomainError('Blog not found', HttpStatus.NotFound);
     }
-    await blogsRepository.update(id, dto);
+    await blogsQueryRepository.update(id, dto);
   },
   async delete(id: string): Promise<void> {
     const blog = await blogsRepository.findById(id);
@@ -40,6 +41,6 @@ export const blogsService = {
   async findMany(
     queryDto: BlogQueryInput,
   ): Promise<{ items: WithId<Blog>[]; totalCount: number }> {
-    return blogsRepository.findMany(queryDto);
+    return blogsQueryRepository.findMany(queryDto);
   },
 };

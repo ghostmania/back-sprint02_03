@@ -1,15 +1,17 @@
 import { WithId } from 'mongodb';
 import { PostInputDto } from '../dto/post.input-dto';
 import { postsRepository } from '../repositories/posts.repository';
+import { postsQueryRepository } from '../repositories/posts.query.repository';
 import { blogsRepository } from '../../blogs/repositories/blogs.repository';
 import { Post } from '../types/post';
 import { DomainError } from '../../core/errors/domain.error';
 import { HttpStatus } from '../../core/types/http-statuses';
 import { PostQueryInput } from '../routers/input/post-query.input';
+import { blogsQueryRepository } from '../../blogs/repositories/blogs.query.repository';
 
 export const postsService = {
   async createPost(dto: PostInputDto): Promise<string> {
-    const blog = await blogsRepository.findByIdOrFail(dto.blogId);
+    const blog = await blogsQueryRepository.findByIdOrFail(dto.blogId);
 
     const newPost: Omit<Post, 'id'> = {
       title: dto.title,
@@ -24,7 +26,7 @@ export const postsService = {
   },
 
   async findByIdOrFail(id: string): Promise<WithId<Omit<Post, 'id'>>> {
-    return postsRepository.findByIdOrFail(id);
+    return postsQueryRepository.findByIdOrFail(id);
   },
 
   async update(id: string, dto: PostInputDto): Promise<void> {
@@ -33,7 +35,7 @@ export const postsService = {
       throw new DomainError('Blog not found', HttpStatus.BadRequest);
     }
 
-    await postsRepository.update(id, {
+    await postsQueryRepository.update(id, {
       title: dto.title,
       shortDescription: dto.shortDescription,
       content: dto.content,
@@ -51,20 +53,21 @@ export const postsService = {
   },
 
   async findAll(): Promise<WithId<Omit<Post, 'id'>>[]> {
-    return postsRepository.findAll();
+    return postsQueryRepository.findAll();
   },
 
   async findMany(
     queryDto: PostQueryInput,
   ): Promise<{ items: WithId<Post>[]; totalCount: number }> {
-    return postsRepository.findMany(queryDto);
+    return postsQueryRepository.findMany(queryDto);
   },
+
   async findPostsForBlog(
     queryDto: PostQueryInput,
     blogId: string,
   ): Promise<{ items: WithId<Post>[]; totalCount: number }> {
-    await blogsRepository.findByIdOrFail(blogId);
+    await blogsQueryRepository.findByIdOrFail(blogId);
 
-    return postsRepository.findPostsForBlog(queryDto, blogId);
+    return postsQueryRepository.findPostsForBlog(queryDto, blogId);
   },
 };
