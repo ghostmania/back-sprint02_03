@@ -10,6 +10,11 @@ import { PostHasValidFIeldsMiddleware } from '../middleware/PostHasValidFieldsMi
 import { paginationAndSortingValidation } from '../../core/middleware/validation/query-pagination-sorting.validation-middleware';
 import { PostSortField } from './input/post-sort-field';
 import { inputValidationResultMiddleware } from '../../core/middleware/validation/input-validtion-result.middleware';
+import { accessTokenGuard } from '../../auth/guards/access.token.guard';
+import { CommentHasValidFieldsMiddleware } from '../../comments/middleware/CommentHasValidFieldsMiddleware';
+import { createPostCommentHandler } from './handlers/create-post-comment.handler';
+import { getPostCommentsHandler } from './handlers/get-post-comments.handler';
+import { CommentSortField } from '../../comments/routers/input/comment-sort-field';
 
 export const postsRouter = Router({});
 
@@ -21,6 +26,18 @@ postsRouter
     getPostsListHandler,
   )
 
+  .get(
+    '/:postId/comments',
+    paginationAndSortingValidation(CommentSortField),
+    inputValidationResultMiddleware,
+    getPostCommentsHandler,
+  )
+  .post(
+    '/:postId/comments',
+    accessTokenGuard,
+    CommentHasValidFieldsMiddleware,
+    createPostCommentHandler,
+  )
   .get('/:id', DocumentExistGuardMiddleware, getPostByIdHandler)
   .post(
     '',
