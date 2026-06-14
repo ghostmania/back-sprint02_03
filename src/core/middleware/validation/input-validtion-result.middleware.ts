@@ -5,30 +5,12 @@ import {
 } from 'express-validator';
 import { NextFunction, Request, Response } from 'express';
 import { HttpStatus } from '../../types/http-statuses';
-import { ValidationErrorListOutput } from '../../types/validationError.dto';
-import { ValidationErrorType } from '../../types/validationError';
 
-export const createErrorMessages = (
-  errors: ValidationErrorType[],
-): ValidationErrorListOutput => {
-  return {
-    errors: errors.map((error) => ({
-      status: error.status,
-      detail: error.detail, //error message
-      source: { pointer: error.source ?? '' }, //error field
-      code: error.code ?? null, //domain error code
-    })),
-  };
-};
+type FieldError = { field: string; message: string };
 
-const formaValidationError = (error: ValidationError): ValidationErrorType => {
+const formatValidationError = (error: ValidationError): FieldError => {
   const expressError = error as unknown as FieldValidationError;
-
-  return {
-    status: HttpStatus.BadRequest,
-    source: expressError.path,
-    detail: expressError.msg,
-  };
+  return { field: expressError.path, message: expressError.msg };
 };
 
 export const inputValidationResultMiddleware = (
@@ -37,11 +19,11 @@ export const inputValidationResultMiddleware = (
   next: NextFunction,
 ) => {
   const errors = validationResult(req)
-    .formatWith(formaValidationError)
+    .formatWith(formatValidationError)
     .array({ onlyFirstError: true });
 
   if (errors.length > 0) {
-    res.status(HttpStatus.BadRequest).json(createErrorMessages(errors));
+    res.status(HttpStatus.BadRequest).json({ errorsMessages: errors });
     return;
   }
   next();

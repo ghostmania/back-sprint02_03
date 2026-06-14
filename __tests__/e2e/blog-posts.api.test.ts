@@ -145,12 +145,9 @@ describe('Blog Posts API', () => {
         .get(`/blogs/${nonExistingId}/posts`)
         .expect(HttpStatus.NotFound);
 
-      expect(response.body.errors).toEqual(
+      expect(response.body.errorsMessages).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({
-            status: HttpStatus.NotFound,
-            detail: 'Blog not found',
-          }),
+          expect.objectContaining({ message: 'Blog not found' }),
         ]),
       );
     });
@@ -160,13 +157,8 @@ describe('Blog Posts API', () => {
         .get(`/blogs/${invalidId}/posts`)
         .expect(HttpStatus.BadRequest);
 
-      expect(response.body.errors).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            status: HttpStatus.BadRequest,
-            source: { pointer: 'id' },
-          }),
-        ]),
+      expect(response.body.errorsMessages).toEqual(
+        expect.arrayContaining([expect.objectContaining({ field: 'id' })]),
       );
     });
   });
@@ -251,12 +243,9 @@ describe('Blog Posts API', () => {
         .send(validPostBody)
         .expect(HttpStatus.NotFound);
 
-      expect(response.body.errors).toEqual(
+      expect(response.body.errorsMessages).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({
-            status: HttpStatus.NotFound,
-            detail: 'Blog not found',
-          }),
+          expect.objectContaining({ message: 'Blog not found' }),
         ]),
       );
     });
@@ -268,13 +257,8 @@ describe('Blog Posts API', () => {
         .send(validPostBody)
         .expect(HttpStatus.BadRequest);
 
-      expect(response.body.errors).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            status: HttpStatus.BadRequest,
-            source: { pointer: 'id' },
-          }),
-        ]),
+      expect(response.body.errorsMessages).toEqual(
+        expect.arrayContaining([expect.objectContaining({ field: 'id' })]),
       );
     });
   });
