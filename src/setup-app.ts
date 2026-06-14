@@ -1,4 +1,5 @@
 import express, { Express } from 'express';
+import cookieParser from 'cookie-parser';
 import { blogsRouter } from './blogs/routers/blogs.router';
 import { postsRouter } from './posts/routers/posts.router';
 import { setupSwagger } from './core/swagger/setup-swagger';
@@ -9,6 +10,7 @@ import { commentsRouter } from './comments/routers/comments.router';
 
 export const setupApp = (app: Express) => {
   app.use(express.json()); // middleware для парсинга JSON в теле запроса
+  app.use(cookieParser());
 
   // основной роут
   app.get('/', (req, res) => {

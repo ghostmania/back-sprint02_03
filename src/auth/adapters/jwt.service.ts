@@ -1,29 +1,35 @@
 import jwt from 'jsonwebtoken';
 import { appConfig } from '../../common/config/config';
 
+function toJwtExpiry(val: string): number | string {
+  return /^\d+$/.test(val) ? parseInt(val, 10) : val;
+}
+
 export const jwtService = {
-  async createToken(userId: string): Promise<string> {
-    return jwt.sign(
-      { userId },
-      appConfig.AC_SECRET,
-      //     {
-      //   expiresIn: appConfig.AC_TIME,
-      // }
-    );
+  async createAccessToken(userId: string): Promise<string> {
+    return jwt.sign({ userId }, appConfig.AC_SECRET, {
+      expiresIn: toJwtExpiry(appConfig.AC_TIME) as jwt.SignOptions['expiresIn'],
+    });
   },
-  async decodeToken(token: string): Promise<any> {
-    try {
-      return jwt.decode(token);
-    } catch (e: unknown) {
-      console.error("Can't decode token", e);
-      return null;
-    }
+
+  async createRefreshToken(userId: string): Promise<string> {
+    return jwt.sign({ userId }, appConfig.RT_SECRET, {
+      expiresIn: toJwtExpiry(appConfig.RT_TIME) as jwt.SignOptions['expiresIn'],
+    });
   },
+
   async verifyToken(token: string): Promise<{ userId: string } | null> {
     try {
       return jwt.verify(token, appConfig.AC_SECRET) as { userId: string };
-    } catch (error) {
-      console.error('Token verify some error');
+    } catch {
+      return null;
+    }
+  },
+
+  async verifyRefreshToken(token: string): Promise<{ userId: string } | null> {
+    try {
+      return jwt.verify(token, appConfig.RT_SECRET) as { userId: string };
+    } catch {
       return null;
     }
   },

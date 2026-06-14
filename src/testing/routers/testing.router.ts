@@ -4,6 +4,7 @@ import {
   blogsCollection,
   commentsCollection,
   postsCollection,
+  refreshTokensCollection,
   usersCollection,
 } from '../../db/mongo.db';
 
@@ -21,6 +22,9 @@ testingRouter.delete('/all-data', async (req: Request, res: Response) => {
   }
   if (commentsCollection) {
     await commentsCollection.deleteMany({});
+  }
+  if (refreshTokensCollection) {
+    await refreshTokensCollection.deleteMany({});
   }
   res.sendStatus(HttpStatus.NoContent);
 });

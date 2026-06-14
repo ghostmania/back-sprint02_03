@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 import { add } from 'date-fns';
+import jwt from 'jsonwebtoken';
 import { LoginAttributes } from '../dto/login.attributes';
 import { usersQueryRepository } from '../../users/repositories/users.query.repository';
 import { usersRepository } from '../../users/repositories/users.repository';
@@ -11,11 +12,19 @@ import { ResultStatus } from '../../common/result/resultCode';
 import { WithId } from 'mongodb';
 import { User } from '../../users/types/user';
 import { UserAttributes } from '../../users/dto/user.attributes';
+import { refreshTokensRepository } from '../repositories/refresh-tokens.repository';
+
+function tokenExpiresAt(token: string): Date {
+  const decoded = jwt.decode(token) as { exp?: number } | null;
+  return decoded?.exp
+    ? new Date(decoded.exp * 1000)
+    : new Date(Date.now() + 20_000);
+}
 
 export const authService = {
   async login(
     dto: LoginAttributes,
-  ): Promise<Result<{ accessToken: string } | null>> {
+  ): Promise<Result<{ accessToken: string; refreshToken: string } | null>> {
     const result = await this.checkUserCredentials(
       dto.loginOrEmail,
       dto.password,
@@ -29,13 +38,91 @@ export const authService = {
       };
     }
 
-    const accessToken = await jwtService.createToken(
-      result.data!._id.toString(),
+    const userId = result.data!._id.toString();
+    const accessToken = await jwtService.createAccessToken(userId);
+    const refreshToken = await jwtService.createRefreshToken(userId);
+
+    await refreshTokensRepository.save(
+      userId,
+      refreshToken,
+      tokenExpiresAt(refreshToken),
     );
 
     return {
       status: ResultStatus.Success,
-      data: { accessToken },
+      data: { accessToken, refreshToken },
+      extensions: [],
+    };
+  },
+
+  async refreshTokens(
+    refreshToken: string,
+  ): Promise<Result<{ accessToken: string; refreshToken: string } | null>> {
+    const payload = await jwtService.verifyRefreshToken(refreshToken);
+    if (!payload) {
+      return {
+        status: ResultStatus.Unauthorized,
+        errorMessage: 'Unauthorized',
+        extensions: [],
+        data: null,
+      };
+    }
+
+    const isValid = await refreshTokensRepository.isValid(refreshToken);
+    if (!isValid) {
+      return {
+        status: ResultStatus.Unauthorized,
+        errorMessage: 'Unauthorized',
+        extensions: [],
+        data: null,
+      };
+    }
+
+    await refreshTokensRepository.revoke(refreshToken);
+
+    const userId = payload.userId;
+    const newAccessToken = await jwtService.createAccessToken(userId);
+    const newRefreshToken = await jwtService.createRefreshToken(userId);
+
+    await refreshTokensRepository.save(
+      userId,
+      newRefreshToken,
+      tokenExpiresAt(newRefreshToken),
+    );
+
+    return {
+      status: ResultStatus.Success,
+      data: { accessToken: newAccessToken, refreshToken: newRefreshToken },
+      extensions: [],
+    };
+  },
+
+  async logout(refreshToken: string): Promise<Result<null>> {
+    const payload = await jwtService.verifyRefreshToken(refreshToken);
+    if (!payload) {
+      return {
+        status: ResultStatus.Unauthorized,
+        errorMessage: 'Unauthorized',
+        extensions: [],
+        data: null,
+      };
+    }
+
+    const isValid = await refreshTokensRepository.isValid(refreshToken);
+    if (!isValid) {
+      return {
+        status: ResultStatus.Unauthorized,
+        errorMessage: 'Unauthorized',
+        extensions: [],
+        data: null,
+      };
+    }
+
+    await refreshTokensRepository.revoke(refreshToken);
+
+    return {
+      status: ResultStatus.Success,
+      data: null,
       extensions: [],
     };
   },
