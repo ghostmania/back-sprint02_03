@@ -58,4 +58,14 @@ export const usersQueryRepository = {
       $or: [{ email: loginOrEmail }, { login: loginOrEmail }],
     });
   },
+
+  async findByEmail(email: string): Promise<WithId<User> | null> {
+    return usersCollection.findOne({ email });
+  },
+
+  async findByConfirmationCode(code: string): Promise<WithId<User> | null> {
+    return usersCollection.findOne({
+      'emailConfirmation.confirmationCode': code,
+    });
+  },
 };

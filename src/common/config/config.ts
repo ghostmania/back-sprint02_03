@@ -11,5 +11,7 @@ export const appConfig = {
   RT_SECRET: process.env.RT_SECRET,
   DB_TYPE: process.env.DB_TYPE,
   EMAIL: process.env.EMAIL as string,
-  EMAIL_PASS: process.env.EMAIL_PASS as string,
+  EMAIL_FROM: process.env.EMAIL_FROM as string,
+  CONFIRM_EMAIL_URL: process.env.CONFIRM_EMAIL_URL as string,
+  GOOGLE_APP_PASSWORD: process.env.GOOGLE_APP_PASSWORD as string,
 };

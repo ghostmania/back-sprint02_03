@@ -1,5 +1,5 @@
 import { ObjectId, WithId } from 'mongodb';
-import { User } from '../types/user';
+import { EmailConfirmation, User } from '../types/user';
 import { usersCollection } from '../../db/mongo.db';
 
 export const usersRepository = {
@@ -10,6 +10,23 @@ export const usersRepository = {
   async create(newUser: User): Promise<string> {
     const insertResult = await usersCollection.insertOne(newUser);
     return insertResult.insertedId.toString();
+  },
+
+  async updateEmailConfirmation(
+    userId: string,
+    emailConfirmation: EmailConfirmation,
+  ): Promise<void> {
+    await usersCollection.updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: { emailConfirmation } },
+    );
+  },
+
+  async clearEmailConfirmation(userId: string): Promise<void> {
+    await usersCollection.updateOne(
+      { _id: new ObjectId(userId) },
+      { $set: { emailConfirmation: null } },
+    );
   },
 
   async delete(id: string): Promise<void> {

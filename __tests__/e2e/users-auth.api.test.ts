@@ -149,6 +149,6 @@ describe('Users + Auth flow', () => {
         loginOrEmail: userInput.login,
         password: 'wrong-password',
       })
-      .expect(HttpStatus.InternalServerError);
+      .expect(HttpStatus.Unauthorized);
   });
 });

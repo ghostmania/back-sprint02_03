@@ -22,6 +22,7 @@ export const usersService = {
       email: dto.email,
       passwordHash,
       createdAt: new Date(),
+      emailConfirmation: null,
     };
     return usersRepository.create(newUser);
   },
