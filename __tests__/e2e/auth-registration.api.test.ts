@@ -73,7 +73,7 @@ describe('Auth registration flow', () => {
         .send({ ...validUser, email: 'other@example.com' })
         .expect(HttpStatus.BadRequest);
 
-      expect(res.body).toEqual(
+      expect(res.body.errorsMessages).toEqual(
         expect.arrayContaining([expect.objectContaining({ field: 'login' })]),
       );
     });
@@ -89,7 +89,7 @@ describe('Auth registration flow', () => {
         .send({ ...validUser, login: 'other99' })
         .expect(HttpStatus.BadRequest);
 
-      expect(res.body).toEqual(
+      expect(res.body.errorsMessages).toEqual(
         expect.arrayContaining([expect.objectContaining({ field: 'email' })]),
       );
     });

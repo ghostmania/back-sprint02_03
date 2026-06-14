@@ -4,6 +4,7 @@ import { authService } from '../../application/auth.service';
 import { HttpStatus } from '../../../core/types/http-statuses';
 import { ResultStatus } from '../../../common/result/resultCode';
 import { resultCodeToHttpException } from '../../../common/result/resultCodeToHttpException';
+import { createErrorMessages } from '../../../core/utils/error.utils';
 
 export async function registrationEmailResendingHandler(
   req: Request,
@@ -18,7 +19,7 @@ export async function registrationEmailResendingHandler(
     if (result.status !== ResultStatus.Success) {
       res
         .status(resultCodeToHttpException(result.status))
-        .send(result.extensions);
+        .send(createErrorMessages(result.extensions));
       return;
     }
 

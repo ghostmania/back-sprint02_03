@@ -5,6 +5,7 @@ import { HttpStatus } from '../../../core/types/http-statuses';
 import { ResultStatus } from '../../../common/result/resultCode';
 import { resultCodeToHttpException } from '../../../common/result/resultCodeToHttpException';
 import { UserAttributes } from '../../../users/dto/user.attributes';
+import { createErrorMessages } from '../../../core/utils/error.utils';
 
 export async function registrationHandler(req: Request, res: Response) {
   try {
@@ -14,7 +15,7 @@ export async function registrationHandler(req: Request, res: Response) {
     if (result.status !== ResultStatus.Success) {
       res
         .status(resultCodeToHttpException(result.status))
-        .send(result.extensions);
+        .send(createErrorMessages(result.extensions));
       return;
     }
 

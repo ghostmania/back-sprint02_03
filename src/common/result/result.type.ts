@@ -1,7 +1,7 @@
 import { ResultStatus } from './resultCode';
 
 type ExtensionType = {
-  field: string | null;
+  field: string;
   message: string;
 };
 
