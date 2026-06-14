@@ -58,3 +58,5 @@ docs/
 /functions/.env
 /functions/.env.*
 !/functions/.env.example
+AGENTS.md
+CLAUDE.md
