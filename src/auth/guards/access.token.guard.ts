@@ -8,7 +8,6 @@ export const  accessTokenGuard = async (req: Request, res: Response, next: NextF
   }
 
   const [authType, token] = req.headers.authorization.split(' ')
-    // [1];
   if (authType !== 'Bearer') {
     return res.sendStatus(401);
   }
