@@ -5,7 +5,7 @@ import {
   blogsCollection,
   commentsCollection,
   postsCollection,
-  refreshTokensCollection,
+  securityDevicesCollection,
   usersCollection,
 } from '../../db/mongo.db';
 
@@ -24,8 +24,8 @@ testingRouter.delete('/all-data', async (req: Request, res: Response) => {
   if (commentsCollection) {
     await commentsCollection.deleteMany({});
   }
-  if (refreshTokensCollection) {
-    await refreshTokensCollection.deleteMany({});
+  if (securityDevicesCollection) {
+    await securityDevicesCollection.deleteMany({});
   }
   if (apiRequestsCollection) {
     await apiRequestsCollection.deleteMany({});

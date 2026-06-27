@@ -12,18 +12,13 @@ import { ResultStatus } from '../../common/result/resultCode';
 import { WithId } from 'mongodb';
 import { User } from '../../users/types/user';
 import { UserAttributes } from '../../users/dto/user.attributes';
-import { refreshTokensRepository } from '../repositories/refresh-tokens.repository';
-
-function tokenExpiresAt(token: string): Date {
-  const decoded = jwt.decode(token) as { exp?: number } | null;
-  return decoded?.exp
-    ? new Date(decoded.exp * 1000)
-    : new Date(Date.now() + 20_000);
-}
+import { securityDevicesRepository } from '../../securityDevices/repositories/security-devices.repository';
 
 export const authService = {
   async login(
     dto: LoginAttributes,
+    ip: string,
+    userAgent: string,
   ): Promise<Result<{ accessToken: string; refreshToken: string } | null>> {
     const result = await this.checkUserCredentials(
       dto.loginOrEmail,
@@ -39,14 +34,23 @@ export const authService = {
     }
 
     const userId = result.data!._id.toString();
+    const deviceId = randomUUID();
+    const lastActiveDate = new Date().toISOString();
     const accessToken = await jwtService.createAccessToken(userId);
-    const refreshToken = await jwtService.createRefreshToken(userId);
-
-    await refreshTokensRepository.save(
+    const refreshToken = await jwtService.createRefreshToken(
       userId,
-      refreshToken,
-      tokenExpiresAt(refreshToken),
+      deviceId,
+      lastActiveDate,
     );
+    const decoded = jwt.decode(refreshToken) as { exp: number };
+    await securityDevicesRepository.create({
+      userId,
+      deviceId,
+      ip: ip || 'unknown',
+      title: userAgent || 'Unknown device',
+      lastActiveDate,
+      expirationDate: new Date(decoded.exp * 1000).toISOString(),
+    });
 
     return {
       status: ResultStatus.Success,
@@ -68,8 +72,10 @@ export const authService = {
       };
     }
 
-    const isValid = await refreshTokensRepository.isValid(refreshToken);
-    if (!isValid) {
+    const session = await securityDevicesRepository.findByDeviceId(
+      payload.deviceId,
+    );
+    if (!session || session.lastActiveDate !== payload.lastActiveDate) {
       return {
         status: ResultStatus.Unauthorized,
         errorMessage: 'Unauthorized',
@@ -78,16 +84,19 @@ export const authService = {
       };
     }
 
-    await refreshTokensRepository.revoke(refreshToken);
-
-    const userId = payload.userId;
+    const { userId, deviceId } = payload;
+    const newLastActiveDate = new Date().toISOString();
     const newAccessToken = await jwtService.createAccessToken(userId);
-    const newRefreshToken = await jwtService.createRefreshToken(userId);
-
-    await refreshTokensRepository.save(
+    const newRefreshToken = await jwtService.createRefreshToken(
       userId,
-      newRefreshToken,
-      tokenExpiresAt(newRefreshToken),
+      deviceId,
+      newLastActiveDate,
+    );
+    const decoded = jwt.decode(newRefreshToken) as { exp: number };
+    await securityDevicesRepository.updateLastActive(
+      deviceId,
+      newLastActiveDate,
+      new Date(decoded.exp * 1000).toISOString(),
     );
 
     return {
@@ -108,8 +117,10 @@ export const authService = {
       };
     }
 
-    const isValid = await refreshTokensRepository.isValid(refreshToken);
-    if (!isValid) {
+    const session = await securityDevicesRepository.findByDeviceId(
+      payload.deviceId,
+    );
+    if (!session || session.lastActiveDate !== payload.lastActiveDate) {
       return {
         status: ResultStatus.Unauthorized,
         errorMessage: 'Unauthorized',
@@ -118,7 +129,7 @@ export const authService = {
       };
     }
 
-    await refreshTokensRepository.revoke(refreshToken);
+    await securityDevicesRepository.deleteByDeviceId(payload.deviceId);
 
     return {
       status: ResultStatus.Success,

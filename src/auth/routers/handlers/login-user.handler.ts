@@ -12,7 +12,11 @@ export async function loginUserHandler(
   res: Response,
 ) {
   try {
-    const result = await authService.login(req.body);
+    const result = await authService.login(
+      req.body,
+      req.ip || 'unknown',
+      req.headers['user-agent'] || 'Unknown device',
+    );
     if (result.status !== ResultStatus.Success) {
       return res
         .status(resultCodeToHttpException(result.status))

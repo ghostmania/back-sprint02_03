@@ -7,11 +7,12 @@ import { testingRouter } from './testing/routers/testing.router';
 import { usersRouter } from './users/routers/users.router';
 import { authRouter } from './auth/routers/auth.router';
 import { commentsRouter } from './comments/routers/comments.router';
+import { securityDevicesRouter } from './securityDevices/routers/security-devices.router';
 
 export const setupApp = (app: Express) => {
   app.use(express.json()); // middleware для парсинга JSON в теле запроса
   app.use(cookieParser());
-
+  app.set('trust proxy', true)
   // основной роут
   app.get('/', (req, res) => {
     res.status(200).send('Hello world!');
@@ -22,6 +23,7 @@ export const setupApp = (app: Express) => {
   app.use('/comments', commentsRouter);
   app.use('/auth', authRouter);
   app.use('/users', usersRouter);
+  app.use('/security/devices', securityDevicesRouter);
   app.use('/testing', testingRouter);
 
   setupSwagger(app);
