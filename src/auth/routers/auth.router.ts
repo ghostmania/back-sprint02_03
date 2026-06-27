@@ -11,12 +11,18 @@ import { refreshTokenGuard } from '../guards/refresh-token.guard';
 import { registrationValidation } from '../middleware/registration.validation';
 import { registrationConfirmationValidation } from '../middleware/registration-confirmation.validation';
 import { registrationEmailResendingValidation } from '../middleware/registration-email-resending.validation';
+import { rateLimitMiddleware } from '../middleware/rate-limit.middleware';
 
 export const authRouter = Router({});
 
-authRouter.post('/login', loginUserHandler);
+authRouter.post('/login', rateLimitMiddleware, loginUserHandler);
 
-authRouter.post('/refresh-token', refreshTokenGuard, refreshTokenHandler);
+authRouter.post(
+  '/refresh-token',
+  rateLimitMiddleware,
+  refreshTokenGuard,
+  refreshTokenHandler,
+);
 
 authRouter.post('/logout', refreshTokenGuard, logoutHandler);
 
@@ -24,18 +30,21 @@ authRouter.get('/me', accessTokenGuard, getMeHandler);
 
 authRouter.post(
   '/registration',
+  rateLimitMiddleware,
   ...registrationValidation,
   registrationHandler,
 );
 
 authRouter.post(
   '/registration-confirmation',
+  rateLimitMiddleware,
   ...registrationConfirmationValidation,
   registrationConfirmationHandler,
 );
 
 authRouter.post(
   '/registration-email-resending',
+  rateLimitMiddleware,
   ...registrationEmailResendingValidation,
   registrationEmailResendingHandler,
 );
