@@ -208,14 +208,12 @@ export const authService = {
 
     await usersRepository.create(newUser);
 
-    try {
-      await nodemailerService.sendRegistrationEmail(
-        dto.email,
-        confirmationCode,
-      );
-    } catch (e: unknown) {
-      console.error('Send email error', e);
-    }
+    // Fire-and-forget: do NOT await SMTP. Awaiting it adds ~2-3s per request,
+    // which spaces rapid requests past the 10s rate-limit window so the limiter
+    // never trips (429). The confirmation code is persisted on the user.
+    void nodemailerService
+      .sendRegistrationEmail(dto.email, confirmationCode)
+      .catch((e: unknown) => console.error('Send email error', e));
 
     return {
       status: ResultStatus.Success,
@@ -286,11 +284,11 @@ export const authService = {
       expirationDate: add(new Date(), { hours: 1, minutes: 30 }),
     });
 
-    try {
-      await nodemailerService.sendRegistrationEmail(email, newCode);
-    } catch (e: unknown) {
-      console.error('Send email error', e);
-    }
+    // Fire-and-forget: see registerUser — keep the response fast so rapid
+    // requests stay inside the rate-limit window.
+    void nodemailerService
+      .sendRegistrationEmail(email, newCode)
+      .catch((e: unknown) => console.error('Send email error', e));
 
     return {
       status: ResultStatus.Success,

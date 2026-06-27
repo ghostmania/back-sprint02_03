@@ -19,5 +19,5 @@ export const DocumentExistGuardMiddleware = async (
     return;
   }
 
-  next(); // Успешная авторизация, продолжаем
+  next();
 };
