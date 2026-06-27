@@ -4,18 +4,22 @@ import { HttpStatus } from '../core/types/http-statuses';
 import { createErrorMessages } from '../core/utils/error.utils';
 
 export const DocumentExistGuardMiddleware = async (
-  req: Request,
+  req: Request<{ deviceId: string }>,
   res: Response,
   next: NextFunction,
 ) => {
-  const id = req.params.id + '';
+  const deviceId = req.params.deviceId;
 
-  const doc = await securityDevicesRepository.findByDeviceId(id);
+  const doc = await securityDevicesRepository.findByDeviceId(deviceId);
 
   if (!doc) {
     res
       .status(HttpStatus.NotFound)
-      .send(createErrorMessages([{ field: 'id', message: 'Device not found' }]));
+      .send(
+        createErrorMessages([
+          { field: 'deviceId', message: 'Device not found' },
+        ]),
+      );
     return;
   }
 
